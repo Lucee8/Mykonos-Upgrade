@@ -1,12 +1,12 @@
 {
-  "projectId": "friendly-weft-r41j7",
-  "appId": "1:150961965113:web:8b17296b888d2709a9a5e8",
-  "apiKey": "AIzaSyBMrLSFlpnP_KXySbsfmTxdKl6lY116qns",
-  "authDomain": "friendly-weft-r41j7.firebaseapp.com",
-  "firestoreDatabaseId": "ai-studio-mykonostarkarlip-b053b0ef-c1af-4330-ad99-0ea89887955b",
-  "storageBucket": "friendly-weft-r41j7.firebasestorage.app",
-  "messagingSenderId": "150961965113",
-  "measurementId": "",
-  "oAuthClientId": "150961965113-31edf0ueii3u516a5avoet86die3f3rp.apps.googleusercontent.com",
+  "projectId": "mykonos-7cace",
+  "appId": "1:136820706300:web:966f3945ff31754dcec079",
+  "apiKey": "AIzaSyCa1hA73-VPw9oBa1o0p4CHZub_aDMk4Yk",
+  "authDomain": "mykonos-7cace.firebaseapp.com",
+  "firestoreDatabaseId": "(default)",
+  "storageBucket": "mykonos-7cace.firebasestorage.app",
+  "messagingSenderId": "136820706300",
+  "measurementId": "G-E1VCLJ2HB2",
+  "oAuthClientId": "",
   "recaptchaSiteKey": ""
 }
