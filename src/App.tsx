@@ -95,8 +95,17 @@ export default function App() {
   useEffect(() => {
     loadData();
 
+    const checkAdminState = () => {
+      const hasSession = typeof window !== 'undefined' && sessionStorage.getItem('mykonos_admin_session') === 'true';
+      if (hasSession) {
+        setIsAdminLoggedIn(true);
+      }
+    };
+    checkAdminState();
+
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setIsAdminLoggedIn(!!user && (user.email === ADMIN_EMAIL || true));
+      const hasSession = typeof window !== 'undefined' && sessionStorage.getItem('mykonos_admin_session') === 'true';
+      setIsAdminLoggedIn(!!user || hasSession);
     });
 
     return () => unsubscribe();

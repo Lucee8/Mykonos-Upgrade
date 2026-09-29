@@ -35,7 +35,7 @@ import {
   User as FirebaseUser,
   onAuthStateChanged,
 } from 'firebase/auth';
-import { auth, ADMIN_EMAIL } from '../firebase/config';
+import { auth, ADMIN_EMAIL, ADMIN_DEFAULT_PASSWORD } from '../firebase/config';
 import {
   seedFirestoreDatabase,
   getAllEnquiries,
@@ -86,13 +86,18 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   settings: initialSettings,
   onRefreshData,
 }) => {
+  const [adminSession, setAdminSession] = useState<boolean>(() => {
+    return typeof window !== 'undefined' && sessionStorage.getItem('mykonos_admin_session') === 'true';
+  });
   const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
   const [emailInput, setEmailInput] = useState<string>(ADMIN_EMAIL);
-  const [passwordInput, setPasswordInput] = useState<string>('');
+  const [passwordInput, setPasswordInput] = useState<string>(ADMIN_DEFAULT_PASSWORD);
   const [authError, setAuthError] = useState<string>('');
   const [authSuccess, setAuthSuccess] = useState<string>('');
   const [isAuthenticating, setIsAuthenticating] = useState<boolean>(false);
   const [authMode, setAuthMode] = useState<'signin' | 'register'>('signin');
+
+  const isUserLoggedIn = !!currentUser || adminSession;
 
   // Admin tabs
   const [activeTab, setActiveTab] = useState<
@@ -123,6 +128,12 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   const [isUploading, setIsUploading] = useState<boolean>(false);
 
   useEffect(() => {
+    const hasSession = typeof window !== 'undefined' && sessionStorage.getItem('mykonos_admin_session') === 'true';
+    if (hasSession) {
+      setAdminSession(true);
+      loadAllData();
+    }
+
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
       if (user) {
@@ -169,19 +180,49 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     setIsAuthenticating(true);
     setAuthError('');
     setAuthSuccess('');
+
+    const trimmedEmail = emailInput.trim();
+    const isDefaultAdmin =
+      (trimmedEmail.toLowerCase() === ADMIN_EMAIL.toLowerCase() ||
+       trimmedEmail.toLowerCase() === 'samikshakoyande5@gmail.com') &&
+      passwordInput === ADMIN_DEFAULT_PASSWORD;
+
+    // Fast-path: Default admin credentials grant instant access even if Firebase Console provider is off
+    if (isDefaultAdmin) {
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('mykonos_admin_session', 'true');
+      }
+      setAdminSession(true);
+      setAuthSuccess('Welcome! Signed in as Resort Administrator.');
+      showTempMessage('Signed in as Admin');
+      await loadAllData();
+      setIsAuthenticating(false);
+      onRefreshData();
+      return;
+    }
+
     try {
       if (authMode === 'signin') {
-        await signInWithEmailAndPassword(auth, emailInput, passwordInput);
-        setAuthSuccess('Signed in successfully');
+        await signInWithEmailAndPassword(auth, trimmedEmail, passwordInput);
+        setAuthSuccess('Signed in successfully via Firebase Auth');
       } else {
-        await createUserWithEmailAndPassword(auth, emailInput, passwordInput);
+        await createUserWithEmailAndPassword(auth, trimmedEmail, passwordInput);
         setAuthSuccess('Admin account created and logged in!');
       }
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('mykonos_admin_session', 'true');
+      }
+      setAdminSession(true);
       await loadAllData();
+      onRefreshData();
     } catch (err: any) {
-      console.error(err);
-      if (err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
-        setAuthError('Invalid credentials. If this is your first time, switch to "Create Admin Account" below.');
+      console.warn('Auth attempt error:', err);
+      if (err.code === 'auth/operation-not-allowed') {
+        setAuthError(
+          'Email/Password sign-in is disabled in your Firebase console. Please use default admin credentials: chaitanyabeachresort@gmail.com / admin@4101'
+        );
+      } else if (err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
+        setAuthError('Invalid credentials. Default admin: chaitanyabeachresort@gmail.com / admin@4101');
       } else {
         setAuthError(err.message || 'Authentication error.');
       }
@@ -191,7 +232,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   };
 
   const handleLogout = async () => {
-    await signOut(auth);
+    try {
+      await signOut(auth);
+    } catch (_) {}
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem('mykonos_admin_session');
+    }
+    setAdminSession(false);
     setCurrentUser(null);
   };
 
@@ -540,7 +587,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             </div>
           </div>
           <div className="flex items-center gap-2">
-            {currentUser && (
+            {isUserLoggedIn && (
               <button
                 onClick={handleLogout}
                 className="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 hover:bg-white/20 text-xs text-stone-200 rounded-lg transition-colors cursor-pointer"
@@ -572,26 +619,57 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
         )}
 
         {/* Not Logged In View */}
-        {!currentUser ? (
+        {!isUserLoggedIn ? (
           <div className="p-6 sm:p-10 overflow-y-auto">
-            <div className="max-w-md mx-auto space-y-6">
+            <div className="max-w-md mx-auto space-y-5">
               <div className="text-center space-y-2">
                 <div className="w-14 h-14 bg-stone-100 rounded-2xl flex items-center justify-center mx-auto text-[#0B1F33] shadow-inner">
                   <User className="w-7 h-7" />
                 </div>
                 <h3 className="font-serif text-2xl font-bold text-[#0B1F33]">
-                  {authMode === 'signin' ? 'Resort Admin Sign In' : 'Create Admin Account'}
+                  Resort Admin Portal
                 </h3>
                 <p className="text-xs text-stone-500">
-                  Secured with Firebase Auth & Firestore RBAC for{' '}
-                  <span className="font-semibold text-stone-700">{ADMIN_EMAIL}</span>
+                  Manage rooms, reservations, gallery, and rates
                 </p>
+              </div>
+
+              {/* Default Admin Credentials Card */}
+              <div className="bg-amber-50/90 border border-amber-200 rounded-xl p-3.5 text-xs text-amber-950 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold flex items-center gap-1.5 text-amber-900">
+                    <Shield className="w-4 h-4 text-amber-600" />
+                    Default Admin Credentials
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEmailInput(ADMIN_EMAIL);
+                      setPasswordInput(ADMIN_DEFAULT_PASSWORD);
+                    }}
+                    className="text-[11px] font-bold text-amber-700 hover:text-amber-900 underline cursor-pointer"
+                  >
+                    1-Click Auto Fill
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 font-mono text-[11px] bg-white/70 p-2 rounded-lg border border-amber-200/60">
+                  <div>
+                    <span className="text-stone-500 block text-[10px]">Email:</span>
+                    <span className="font-semibold text-stone-900 break-all">{ADMIN_EMAIL}</span>
+                  </div>
+                  <div>
+                    <span className="text-stone-500 block text-[10px]">Password:</span>
+                    <span className="font-semibold text-stone-900">{ADMIN_DEFAULT_PASSWORD}</span>
+                  </div>
+                </div>
               </div>
 
               {authError && (
                 <div className="p-3 bg-red-50 border border-red-200 rounded-xl flex items-start gap-2.5 text-xs text-red-700">
                   <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-                  <span>{authError}</span>
+                  <div>
+                    <span>{authError}</span>
+                  </div>
                 </div>
               )}
 
@@ -633,30 +711,12 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 <button
                   type="submit"
                   disabled={isAuthenticating}
-                  className="w-full py-3 bg-[#0B1F33] hover:bg-[#1A3B5C] text-white rounded-xl font-medium text-sm transition-colors shadow-sm cursor-pointer disabled:opacity-50"
+                  className="w-full py-3 bg-[#0B1F33] hover:bg-[#1A3B5C] text-white rounded-xl font-medium text-sm transition-colors shadow-sm cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
                 >
-                  {isAuthenticating
-                    ? 'Processing...'
-                    : authMode === 'signin'
-                    ? 'Sign In to Management'
-                    : 'Register Admin Credentials'}
+                  <Shield className="w-4 h-4 text-amber-400" />
+                  <span>{isAuthenticating ? 'Authenticating...' : 'Sign In as Admin'}</span>
                 </button>
               </form>
-
-              <div className="text-center pt-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setAuthMode(authMode === 'signin' ? 'register' : 'signin');
-                    setAuthError('');
-                  }}
-                  className="text-xs text-amber-700 hover:text-amber-800 underline font-medium cursor-pointer"
-                >
-                  {authMode === 'signin'
-                    ? "First time setting up? Click here to register credentials"
-                    : 'Already have credentials? Switch to Sign In'}
-                </button>
-              </div>
             </div>
           </div>
         ) : (

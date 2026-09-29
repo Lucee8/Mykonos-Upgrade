@@ -34,4 +34,5 @@ if (typeof window !== 'undefined') {
     });
 }
 
-export const ADMIN_EMAIL = 'samikshakoyande5@gmail.com';
+export const ADMIN_EMAIL = 'chaitanyabeachresort@gmail.com';
+export const ADMIN_DEFAULT_PASSWORD = 'admin@4101';
