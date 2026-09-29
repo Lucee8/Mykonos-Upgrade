@@ -1,0 +1,71 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == 'samikshakoyande5@gmail.com' ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin')
+      );
+    }
+
+    // Public read for resort public catalog
+    match /rooms/{roomId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /experiences/{expId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /dining/{diningId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /gallery/{photoId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /offers/{offerId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow create: if request.resource.data.author is string &&
+                       request.resource.data.comment is string &&
+                       request.resource.data.rating is number;
+      allow update, delete: if isAdmin();
+    }
+
+    match /settings/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Guest enquiries: Anyone can create an enquiry with valid contact info
+    match /enquiries/{enquiryId} {
+      allow create: if request.resource.data.guestName is string &&
+                       request.resource.data.phone is string &&
+                       request.resource.data.checkIn is string &&
+                       request.resource.data.checkOut is string;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // User profiles
+    match /users/{userId} {
+      allow read: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      allow write: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "Mykonos Cottage Tarkarli",
+  "description": "Premium coastal boutique resort in Tarkarli, Malvan with luxury cottages, beachside experiences, Malvani dining, and direct booking concierge.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

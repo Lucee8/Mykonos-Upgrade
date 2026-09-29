@@ -1,0 +1,132 @@
+{
+  "$schema": "https://firebase.google.com/schemas/firestore-blueprint.json",
+  "entities": {
+    "Room": {
+      "collection": "rooms",
+      "fields": {
+        "id": { "type": "string", "description": "Unique room ID" },
+        "name": { "type": "string", "description": "Room name e.g. Aegean Beachfront Cottage" },
+        "slug": { "type": "string", "description": "URL slug" },
+        "category": { "type": "string", "description": "Category e.g. Beachfront, Garden, Luxury Suite" },
+        "shortDescription": { "type": "string", "description": "Short summary for cards" },
+        "description": { "type": "string", "description": "Full description of the cottage" },
+        "basePrice": { "type": "number", "description": "Weekday price per night in INR" },
+        "weekendPrice": { "type": "number", "description": "Weekend price per night in INR" },
+        "maxGuests": { "type": "number", "description": "Maximum guests allowed" },
+        "bedType": { "type": "string", "description": "King Bed, Twin, etc." },
+        "sizeSqFt": { "type": "number", "description": "Area in square feet" },
+        "view": { "type": "string", "description": "Arabian Sea View, Coconut Grove Garden" },
+        "amenities": { "type": "array", "description": "List of amenities (AC, Wi-Fi, Veranda, etc.)" },
+        "inclusions": { "type": "array", "description": "Complimentary Breakfast, Welcome Drink, etc." },
+        "heroImage": { "type": "string", "description": "Primary high-resolution photo URL" },
+        "gallery": { "type": "array", "description": "Additional photo URLs" },
+        "isFeatured": { "type": "boolean", "description": "Featured on home page" },
+        "order": { "type": "number", "description": "Display order" },
+        "updatedAt": { "type": "string", "description": "ISO timestamp" }
+      }
+    },
+    "Enquiry": {
+      "collection": "enquiries",
+      "fields": {
+        "id": { "type": "string", "description": "Unique enquiry ID" },
+        "guestName": { "type": "string", "description": "Guest full name" },
+        "email": { "type": "string", "description": "Guest email" },
+        "phone": { "type": "string", "description": "Guest phone / WhatsApp number" },
+        "checkIn": { "type": "string", "description": "Check-in date YYYY-MM-DD" },
+        "checkOut": { "type": "string", "description": "Check-out date YYYY-MM-DD" },
+        "roomId": { "type": "string", "description": "Selected room ID or 'any'" },
+        "roomName": { "type": "string", "description": "Room name selected" },
+        "adults": { "type": "number", "description": "Number of adults" },
+        "children": { "type": "number", "description": "Number of children" },
+        "specialRequests": { "type": "string", "description": "Any special requirements or dietary notes" },
+        "estimatedNights": { "type": "number", "description": "Calculated nights" },
+        "estimatedTotal": { "type": "number", "description": "Estimated total in INR" },
+        "status": { "type": "string", "description": "Status: new, contacted, confirmed, cancelled" },
+        "source": { "type": "string", "description": "Source: web_form, whatsapp_click" },
+        "createdAt": { "type": "string", "description": "Creation timestamp" }
+      }
+    },
+    "Experience": {
+      "collection": "experiences",
+      "fields": {
+        "id": { "type": "string", "description": "Unique experience ID" },
+        "title": { "type": "string", "description": "Experience title e.g. Tarkarli Scuba & Coral Safari" },
+        "category": { "type": "string", "description": "Watersports, Sightseeing, Heritage, Romance" },
+        "summary": { "type": "string", "description": "Brief highlight" },
+        "description": { "type": "string", "description": "Detailed description" },
+        "duration": { "type": "string", "description": "Duration e.g. 3-4 Hours" },
+        "priceText": { "type": "string", "description": "Pricing info or from INR 1,500" },
+        "highlights": { "type": "array", "description": "Bullet points" },
+        "image": { "type": "string", "description": "High-res image URL" },
+        "location": { "type": "string", "description": "Tarkarli Beach, Sindhudurg Fort, Devbagh" },
+        "order": { "type": "number", "description": "Display order" }
+      }
+    },
+    "DiningItem": {
+      "collection": "dining",
+      "fields": {
+        "id": { "type": "string", "description": "Unique dining item ID" },
+        "name": { "type": "string", "description": "Dish or culinary highlight" },
+        "category": { "type": "string", "description": "Malvani Seafood, Coastal Veg, Beverages, Breakfast" },
+        "description": { "type": "string", "description": "Description of ingredients and preparation" },
+        "isVeg": { "type": "boolean", "description": "Whether vegetarian" },
+        "isChefSpecial": { "type": "boolean", "description": "Signature Malvani specialty" },
+        "priceText": { "type": "string", "description": "Price display" },
+        "image": { "type": "string", "description": "Dish photo URL" },
+        "order": { "type": "number", "description": "Display order" }
+      }
+    },
+    "GalleryItem": {
+      "collection": "gallery",
+      "fields": {
+        "id": { "type": "string", "description": "Unique photo ID" },
+        "title": { "type": "string", "description": "Image caption" },
+        "category": { "type": "string", "description": "Resort & Cottages, Beachfront, Dining, Activities" },
+        "imageUrl": { "type": "string", "description": "Image URL" },
+        "featured": { "type": "boolean", "description": "Show on home gallery preview" },
+        "order": { "type": "number", "description": "Display order" }
+      }
+    },
+    "SpecialOffer": {
+      "collection": "offers",
+      "fields": {
+        "id": { "type": "string", "description": "Unique offer ID" },
+        "title": { "type": "string", "description": "Promotion title e.g. Monsoons & Coastal Serenity" },
+        "code": { "type": "string", "description": "Promo code e.g. DIRECT15" },
+        "discountPercent": { "type": "number", "description": "Percentage discount" },
+        "description": { "type": "string", "description": "Offer details" },
+        "validity": { "type": "string", "description": "Valid till date/season" },
+        "badge": { "type": "string", "description": "Tag badge e.g. Best Value, Direct Booking Perk" },
+        "active": { "type": "boolean", "description": "Offer currently active" }
+      }
+    },
+    "Review": {
+      "collection": "reviews",
+      "fields": {
+        "id": { "type": "string", "description": "Unique review ID" },
+        "author": { "type": "string", "description": "Guest name" },
+        "rating": { "type": "number", "description": "Rating out of 5" },
+        "stayDate": { "type": "string", "description": "Stay month/year" },
+        "comment": { "type": "string", "description": "Guest feedback" },
+        "roomStayed": { "type": "string", "description": "Room type stayed in" },
+        "source": { "type": "string", "description": "Google, TripAdvisor, Direct" },
+        "isFeatured": { "type": "boolean", "description": "Featured testimonial on homepage" }
+      }
+    },
+    "ResortSettings": {
+      "collection": "settings",
+      "fields": {
+        "resortName": { "type": "string", "description": "Resort official name" },
+        "tagline": { "type": "string", "description": "Tagline" },
+        "phone": { "type": "string", "description": "Primary phone" },
+        "whatsapp": { "type": "string", "description": "WhatsApp number with country code" },
+        "email": { "type": "string", "description": "Contact email" },
+        "address": { "type": "string", "description": "Physical address" },
+        "googleMapsUrl": { "type": "string", "description": "Google Maps link" },
+        "checkInTime": { "type": "string", "description": "Check-in time e.g. 12:00 PM" },
+        "checkOutTime": { "type": "string", "description": "Check-out time e.g. 10:00 AM" },
+        "cancellationPolicy": { "type": "string", "description": "Cancellation and refund rules" }
+      }
+    }
+  }
+}
