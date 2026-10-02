@@ -42,6 +42,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     { id: 'dining', label: 'Malvani Dining', icon: Utensils },
     { id: 'gallery', label: 'Gallery', icon: ImageIcon },
     { id: 'offers', label: 'Offers', icon: Tag },
+    { id: 'reviews', label: 'Reviews & FAQ', icon: Shield },
     { id: 'location', label: 'Location & About', icon: MapPin },
   ];
 
@@ -139,7 +140,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           </nav>
 
           {/* Action CTAs */}
-          <div className="hidden sm:flex items-center space-x-3">
+          <div className="hidden xl:flex items-center space-x-3">
             <a
               href={`https://wa.me/${cleanWhatsapp}?text=${encodeURIComponent('Hello Mykonos Cottage, I want to check rates for upcoming dates.')}`}
               target="_blank"
@@ -159,18 +160,18 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
           </div>
 
-          {/* Mobile hamburger menu */}
-          <div className="flex items-center sm:hidden gap-2">
+          {/* Mobile and Tablet hamburger menu */}
+          <div className="flex items-center lg:hidden gap-2">
             <button
               onClick={() => onOpenBooking()}
-              className="px-3 py-1.5 text-xs font-semibold text-white bg-[#0B1F33] rounded-md"
+              className="px-3.5 py-1.5 text-xs font-semibold text-white bg-[#0B1F33] hover:bg-[#1A3B5C] rounded-lg transition-colors cursor-pointer"
             >
-              Book
+              Book Now
             </button>
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 text-stone-700 hover:text-stone-900 hover:bg-stone-100 rounded-lg focus:outline-hidden"
-              aria-label="Toggle menu"
+              className="p-2 text-stone-700 hover:text-stone-900 hover:bg-stone-100 rounded-lg focus:outline-hidden cursor-pointer"
+              aria-label="Toggle navigation menu"
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -178,9 +179,9 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
       </div>
 
-      {/* Mobile Drawer Menu */}
+      {/* Mobile and Tablet Drawer Menu */}
       {mobileMenuOpen && (
-        <div className="sm:hidden border-t border-[#E8DED0] bg-[#FAF7F2] px-4 pt-3 pb-6 shadow-lg animate-in slide-in-from-top-2 duration-200">
+        <div className="lg:hidden border-t border-[#E8DED0] bg-[#FAF7F2] px-4 pt-3 pb-6 shadow-lg animate-in slide-in-from-top-2 duration-200">
           <div className="flex flex-col space-y-1">
             {navLinks.map((item) => {
               const Icon = item.icon;

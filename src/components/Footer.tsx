@@ -123,10 +123,18 @@ export const Footer: React.FC<FooterProps> = ({
               </li>
               <li>
                 <button
+                  onClick={() => onNavigate('reviews')}
+                  className="hover:text-amber-300 transition-colors cursor-pointer"
+                >
+                  Guest Reviews & FAQs
+                </button>
+              </li>
+              <li>
+                <button
                   onClick={() => onNavigate('location')}
                   className="hover:text-amber-300 transition-colors cursor-pointer"
                 >
-                  Location, Route & FAQs
+                  Location, Route & Directions
                 </button>
               </li>
             </ul>

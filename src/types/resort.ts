@@ -73,12 +73,25 @@ export interface DiningItem {
   order: number;
 }
 
-export type GalleryCategory = 'All' | 'Cottages & Stay' | 'Beachfront & Sunset' | 'Malvani Dining' | 'Adventures & Water Sports';
+export type GalleryCategory =
+  | 'All'
+  | 'Resort'
+  | 'Cottages'
+  | 'Rooms'
+  | 'Beach'
+  | 'Dining'
+  | 'Scuba'
+  | 'Experiences'
+  | 'Tarkarli'
+  | 'Cottages & Stay'
+  | 'Beachfront & Sunset'
+  | 'Malvani Dining'
+  | 'Adventures & Water Sports';
 
 export interface GalleryItem {
   id: string;
   title: string;
-  category: 'Cottages & Stay' | 'Beachfront & Sunset' | 'Malvani Dining' | 'Adventures & Water Sports';
+  category: GalleryCategory;
   imageUrl: string;
   featured: boolean;
   order: number;
@@ -126,5 +139,11 @@ export interface ResortSettings {
 export interface FAQItem {
   question: string;
   answer: string;
-  category: 'Booking & Stay' | 'Activities & Scuba' | 'Food & Dining' | 'Location & Travel';
+  category:
+    | 'Booking & Stay'
+    | 'Activities & Scuba'
+    | 'Food & Dining'
+    | 'Location & Travel'
+    | 'Cottages & Amenities'
+    | 'Policies & Guidelines';
 }

@@ -189,121 +189,141 @@ export async function getAllEnquiries(): Promise<Enquiry[]> {
   }
 }
 
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { auth, storage, ADMIN_EMAIL } from '../firebase/config';
+
+// Helper to ensure authenticated admin user is present before performing protected operations
+export function ensureAuthenticatedAdmin(): void {
+  const user = auth.currentUser;
+  if (!user) {
+    throw new Error('Unauthorized: You must be signed in with Firebase Authentication to perform this action.');
+  }
+  const email = user.email?.toLowerCase();
+  const isAuthorized =
+    email === ADMIN_EMAIL.toLowerCase() || email === 'samikshakoyande5@gmail.com';
+  if (!isAuthorized) {
+    throw new Error(`Forbidden: The signed in account (${user.email}) does not have administrator privileges.`);
+  }
+}
+
+// Upload media file to Firebase Storage
+export async function uploadMediaFile(file: File, folder = 'media'): Promise<string> {
+  ensureAuthenticatedAdmin();
+  const filename = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+  const storageRef = ref(storage, `${folder}/${filename}`);
+  const snapshot = await uploadBytes(storageRef, file);
+  const downloadUrl = await getDownloadURL(snapshot.ref);
+  return downloadUrl;
+}
+
 // Admin: Update enquiry status
 export async function updateEnquiryStatus(enquiryId: string, status: Enquiry['status']): Promise<void> {
+  ensureAuthenticatedAdmin();
   const docRef = doc(db, 'enquiries', enquiryId);
   await updateDoc(docRef, { status });
 }
 
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { storage } from '../firebase/config';
-
-// Upload media file to Firebase Storage
-export async function uploadMediaFile(file: File, folder = 'media'): Promise<string> {
-  try {
-    const filename = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-    const storageRef = ref(storage, `${folder}/${filename}`);
-    const snapshot = await uploadBytes(storageRef, file);
-    const downloadUrl = await getDownloadURL(snapshot.ref);
-    return downloadUrl;
-  } catch (err) {
-    console.error('Firebase storage upload failed, falling back to local object URL or error:', err);
-    // Return a base64 or object URL fallback if storage is restricted
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-  }
-}
-
 // Admin: Save or update room
 export async function saveRoom(room: Room): Promise<void> {
+  ensureAuthenticatedAdmin();
   const docRef = doc(db, 'rooms', room.id);
   await setDoc(docRef, { ...room, updatedAt: new Date().toISOString() }, { merge: true });
 }
 
 // Admin: Delete room
 export async function deleteRoom(roomId: string): Promise<void> {
+  ensureAuthenticatedAdmin();
   const docRef = doc(db, 'rooms', roomId);
   await deleteDoc(docRef);
 }
 
 // Admin: Save or update Gallery item
 export async function saveGalleryItem(item: GalleryItem): Promise<void> {
+  ensureAuthenticatedAdmin();
   const docRef = doc(db, 'gallery', item.id);
   await setDoc(docRef, item, { merge: true });
 }
 
 // Admin: Delete Gallery item
 export async function deleteGalleryItem(id: string): Promise<void> {
+  ensureAuthenticatedAdmin();
   const docRef = doc(db, 'gallery', id);
   await deleteDoc(docRef);
 }
 
 // Admin: Save or update Experience
 export async function saveExperience(item: Experience): Promise<void> {
+  ensureAuthenticatedAdmin();
   const docRef = doc(db, 'experiences', item.id);
   await setDoc(docRef, item, { merge: true });
 }
 
 // Admin: Delete Experience
 export async function deleteExperience(id: string): Promise<void> {
+  ensureAuthenticatedAdmin();
   const docRef = doc(db, 'experiences', id);
   await deleteDoc(docRef);
 }
 
 // Admin: Save or update Dining item
 export async function saveDiningItem(item: DiningItem): Promise<void> {
+  ensureAuthenticatedAdmin();
   const docRef = doc(db, 'dining', item.id);
   await setDoc(docRef, item, { merge: true });
 }
 
 // Admin: Delete Dining item
 export async function deleteDiningItem(id: string): Promise<void> {
+  ensureAuthenticatedAdmin();
   const docRef = doc(db, 'dining', id);
   await deleteDoc(docRef);
 }
 
 // Admin: Save or update Offer
 export async function saveOffer(item: SpecialOffer): Promise<void> {
+  ensureAuthenticatedAdmin();
   const docRef = doc(db, 'offers', item.id);
   await setDoc(docRef, item, { merge: true });
 }
 
 // Admin: Delete Offer
 export async function deleteOffer(id: string): Promise<void> {
+  ensureAuthenticatedAdmin();
   const docRef = doc(db, 'offers', id);
   await deleteDoc(docRef);
 }
 
 // Admin: Save or update Review
 export async function saveReview(review: Review): Promise<void> {
+  ensureAuthenticatedAdmin();
   const docRef = doc(db, 'reviews', review.id);
   await setDoc(docRef, review, { merge: true });
 }
 
 // Admin: Delete Review
 export async function deleteReview(id: string): Promise<void> {
+  ensureAuthenticatedAdmin();
   const docRef = doc(db, 'reviews', id);
   await deleteDoc(docRef);
 }
 
 // Admin: Delete enquiry
 export async function deleteEnquiry(enquiryId: string): Promise<void> {
+  ensureAuthenticatedAdmin();
   const docRef = doc(db, 'enquiries', enquiryId);
   await deleteDoc(docRef);
 }
 
 // Admin: Save Resort Settings (Homepage content, hero, phone, address)
 export async function saveResortSettings(settings: ResortSettings): Promise<void> {
+  ensureAuthenticatedAdmin();
   const docRef = doc(db, 'settings', 'general');
   await setDoc(docRef, settings, { merge: true });
 }
 
 // Admin: Seed entire database with authentic Tarkarli data
 export async function seedFirestoreDatabase(): Promise<{ success: boolean; count: number }> {
+  ensureAuthenticatedAdmin();
   let count = 0;
   try {
     // Rooms

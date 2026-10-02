@@ -13,6 +13,7 @@ import { DiningPage } from './pages/DiningPage';
 import { GalleryPage } from './pages/GalleryPage';
 import { OffersPage } from './pages/OffersPage';
 import { LocationAboutPage } from './pages/LocationAboutPage';
+import { ReviewsFaqPage } from './pages/ReviewsFaqPage';
 
 import {
   getRooms,
@@ -95,17 +96,12 @@ export default function App() {
   useEffect(() => {
     loadData();
 
-    const checkAdminState = () => {
-      const hasSession = typeof window !== 'undefined' && sessionStorage.getItem('mykonos_admin_session') === 'true';
-      if (hasSession) {
-        setIsAdminLoggedIn(true);
-      }
-    };
-    checkAdminState();
-
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      const hasSession = typeof window !== 'undefined' && sessionStorage.getItem('mykonos_admin_session') === 'true';
-      setIsAdminLoggedIn(!!user || hasSession);
+      const isAuthorized = !!user && (
+        user.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase() ||
+        user.email?.toLowerCase() === 'samikshakoyande5@gmail.com'
+      );
+      setIsAdminLoggedIn(isAuthorized);
     });
 
     return () => unsubscribe();
@@ -130,9 +126,9 @@ export default function App() {
     setIsBookingOpen(true);
   };
 
-  const selectedRoom = rooms.find(
-    (r) => r.slug === selectedRoomSlug || r.id === selectedRoomSlug
-  );
+  const selectedRoom =
+    rooms.find((r) => r.slug === selectedRoomSlug || r.id === selectedRoomSlug) ||
+    (rooms.length > 0 ? rooms[0] : null);
 
   const cleanWhatsapp = settings.whatsapp.replace(/\D/g, '');
 
@@ -158,6 +154,7 @@ export default function App() {
             diningItems={diningItems}
             offers={offers}
             reviews={reviews}
+            galleryItems={galleryItems}
             onOpenBooking={handleOpenBooking}
             onNavigate={handleNavigate}
             onSelectRoom={handleSelectRoom}
@@ -175,9 +172,11 @@ export default function App() {
         {activeTab === 'room-detail' && selectedRoom && (
           <RoomDetailPage
             room={selectedRoom}
+            rooms={rooms}
             settings={settings}
             onBack={() => handleNavigate('rooms')}
             onOpenBooking={handleOpenBooking}
+            onSelectRoom={handleSelectRoom}
           />
         )}
 
@@ -190,22 +189,66 @@ export default function App() {
         )}
 
         {activeTab === 'dining' && (
-          <DiningPage diningItems={diningItems} settings={settings} />
+          <DiningPage
+            diningItems={diningItems}
+            settings={settings}
+            onOpenBooking={handleOpenBooking}
+          />
         )}
 
         {activeTab === 'gallery' && (
-          <GalleryPage galleryItems={galleryItems} />
+          <GalleryPage
+            galleryItems={galleryItems}
+            settings={settings}
+            onOpenBooking={handleOpenBooking}
+          />
         )}
 
         {activeTab === 'offers' && (
           <OffersPage offers={offers} onOpenBooking={() => handleOpenBooking()} />
         )}
 
-        {activeTab === 'location' && (
+        {(activeTab === 'location' || activeTab === 'about' || activeTab === 'contact' || activeTab === 'policies') && (
           <LocationAboutPage
             settings={settings}
             onOpenBooking={() => handleOpenBooking()}
           />
+        )}
+
+        {(activeTab === 'reviews' || activeTab === 'faq' || activeTab === 'reviews-faq') && (
+          <ReviewsFaqPage
+            reviews={reviews}
+            settings={settings}
+            onOpenBooking={() => handleOpenBooking()}
+          />
+        )}
+
+        {!['home', 'rooms', 'room-detail', 'experiences', 'dining', 'gallery', 'offers', 'location', 'about', 'contact', 'policies', 'reviews', 'faq', 'reviews-faq'].includes(activeTab) && (
+          <div className="max-w-3xl mx-auto px-4 py-24 text-center space-y-6">
+            <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#C26343]">
+              Page Not Found
+            </span>
+            <h1 className="font-serif text-3xl sm:text-4xl font-bold text-[#0B1F33]">
+              Looking for a Coastal Escape?
+            </h1>
+            <p className="text-stone-600 text-sm max-w-md mx-auto font-light leading-relaxed">
+              The page you are looking for is unavailable or has moved. Return to our home sanctuary or explore our beachfront cottages.
+            </p>
+            <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+              <button
+                onClick={() => handleNavigate('home')}
+                className="w-full sm:w-auto px-6 py-3 bg-[#0B1F33] hover:bg-[#1A3B5C] text-white text-xs sm:text-sm font-semibold rounded-xl transition-all cursor-pointer"
+              >
+                Return to Home
+              </button>
+              <button
+                onClick={() => handleNavigate('rooms')}
+                className="w-full sm:w-auto px-6 py-3 bg-[#C26343] hover:bg-[#A84E31] text-white text-xs sm:text-sm font-semibold rounded-xl transition-all cursor-pointer"
+              >
+                View Cottages & Suites
+              </button>
+            </div>
+          </div>
         )}
       </main>
 
